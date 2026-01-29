@@ -1,0 +1,7 @@
+{
+  "name": "Copy of RX Weather Pro",
+  "description": "A high-performance, aesthetically pleasing weather dashboard featuring real-time data, satellite radar, air quality insights, and AI-powered weather summaries using Gemini.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
