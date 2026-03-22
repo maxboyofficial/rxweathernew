@@ -35,7 +35,9 @@ export interface ForecastData {
 
 export interface AQIData {
   aqi: number;
+  us_epa_aqi: number;
   components: {
+    co: number;
     pm2_5: number;
     pm10: number;
     no2: number;

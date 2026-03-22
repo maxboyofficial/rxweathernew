@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Background from './components/Background';
 import MapDisplay from './components/MapDisplay';
 import LoginModal from './components/Auth';
-import { ForecastModal, AQIModal } from './components/ForecastModals';
+import IntroAnimation from './components/IntroAnimation';
 import { 
   fetchWeatherByCity, 
   fetchWeatherByCoords, 
@@ -23,11 +24,9 @@ import {
 
 const App: React.FC = () => {
   // UI State
+  const [showIntro, setShowIntro] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('auto');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isHourlyOpen, setIsHourlyOpen] = useState(false);
-  const [isDailyOpen, setIsDailyOpen] = useState(false);
-  const [isAQIOpen, setIsAQIOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   
@@ -76,6 +75,15 @@ const App: React.FC = () => {
     return { label: "Extreme", color: "text-purple-500" };
   };
 
+  const getAQIStatus = (val: number) => {
+    if (val <= 50) return { label: "Pristine", color: "text-green-400", bg: "bg-green-500/10" };
+    if (val <= 100) return { label: "Moderate", color: "text-yellow-400", bg: "bg-yellow-500/10" };
+    if (val <= 150) return { label: "Sensitive", color: "text-orange-400", bg: "bg-orange-500/10" };
+    if (val <= 200) return { label: "Unhealthy", color: "text-red-400", bg: "bg-red-500/10" };
+    if (val <= 300) return { label: "Critical", color: "text-purple-400", bg: "bg-purple-500/10" };
+    return { label: "Hazardous", color: "text-rose-600", bg: "bg-rose-600/10" };
+  };
+
   const handleSearch = useCallback(async (query: string) => {
     if (!query) return;
     setLoading(true);
@@ -104,6 +112,13 @@ const App: React.FC = () => {
       setSecondaryLoading(false);
 
       if (aData) {
+        const currentAqi = (aData as AQIData).us_epa_aqi;
+        setHotspot(prev => {
+          if (!prev || currentAqi > prev.aqi) {
+            return { name: weatherData.name, aqi: currentAqi };
+          }
+          return prev;
+        });
         getWeatherInsight(weatherData, aData as AQIData, (uValue as number) || 0, lat, lon)
           .then(setAiInsight)
           .catch(console.error);
@@ -123,10 +138,18 @@ const App: React.FC = () => {
   }, [user]);
 
   const handleLocationSearch = useCallback(() => {
-    if (!navigator.geolocation) return alert("Geolocation not supported");
+    if (!navigator.geolocation) return alert("Geolocation not supported by your browser");
     
     setLoading(true);
+    setError(null);
     setAiInsight({ text: '', links: [] });
+    
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
+    };
+
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { latitude, longitude } = pos.coords;
@@ -147,26 +170,32 @@ const App: React.FC = () => {
         setSecondaryLoading(false);
 
         if (aData) {
+          const currentAqi = (aData as AQIData).us_epa_aqi;
+          setHotspot(prev => {
+            if (!prev || currentAqi > prev.aqi) {
+              return { name: weatherData.name, aqi: currentAqi };
+            }
+            return prev;
+          });
           getWeatherInsight(weatherData, aData as AQIData, (uValue as number) || 0, latitude, longitude)
             .then(setAiInsight)
             .catch(console.error);
         }
       } catch (err: any) {
-        setError(err.message);
+        setError(err.message || "Precision sync failed. Try manual search.");
         setLoading(false);
       }
     }, (err) => {
       setLoading(false);
-      setError("Location access denied. Please enable GPS for accuracy.");
-    }, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    });
+      let msg = "Location access denied.";
+      if (err.code === 1) msg = "Location access denied. Please enable GPS.";
+      else if (err.code === 2) msg = "Position unavailable. Check your connection.";
+      else if (err.code === 3) msg = "Location request timed out. Try again.";
+      setError(msg);
+    }, options);
   }, []);
 
   useEffect(() => {
-    handleSearch("Kathmandu");
     getHotspotData().then(setHotspot);
   }, []);
 
@@ -176,6 +205,10 @@ const App: React.FC = () => {
     setViewMode(next);
   };
 
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+  }, []);
+
   const handleLogin = (newUser: User) => {
     setUser(newUser);
     localStorage.setItem('rx_user', JSON.stringify(newUser));
@@ -183,10 +216,39 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen py-6 sm:py-10 px-4 flex flex-col items-center justify-start transition-all duration-500 ${viewMode === 'mobile' ? 'max-w-md mx-auto' : 'w-full'}`}>
+      <AnimatePresence>
+        {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
+      </AnimatePresence>
+      
       <Background />
 
-      {/* Top Navigation Bar */}
-      <div className="w-full max-w-2xl flex items-center justify-between mb-4 z-50">
+      {!showIntro && (
+        <motion.div 
+          variants={{
+            hidden: { opacity: 0, scale: 0.8 },
+            visible: { 
+              opacity: 1, 
+              scale: 1,
+              transition: {
+                duration: 1,
+                ease: [0.16, 1, 0.3, 1],
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+              }
+            }
+          }}
+          initial="hidden"
+          animate="visible"
+          className="w-full flex flex-col items-center"
+        >
+          {/* Top Navigation Bar */}
+          <motion.div 
+            variants={{
+              hidden: { opacity: 0, scale: 0.9 },
+              visible: { opacity: 1, scale: 1 }
+            }}
+            className="w-full max-w-2xl flex items-center justify-between mb-4 z-50"
+          >
         <div className="flex gap-2">
           <div className="relative">
             <button 
@@ -232,10 +294,16 @@ const App: React.FC = () => {
           <i className="fas fa-magic text-cyan-400" />
           <span className="hidden sm:inline">{viewMode}</span>
         </button>
-      </div>
+      </motion.div>
 
       {/* Main Glass Card */}
-      <div className={`glass w-full max-w-2xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-700 ${viewMode === 'pc' ? 'scale-110 mt-8' : ''}`}>
+      <motion.div 
+        variants={{
+          hidden: { opacity: 0, scale: 0.95 },
+          visible: { opacity: 1, scale: 1 }
+        }}
+        className={`glass w-full max-w-2xl rounded-[32px] sm:rounded-[40px] shadow-2xl overflow-hidden ${viewMode === 'pc' ? 'scale-110 mt-8' : ''}`}
+      >
         <div className="bg-black/20 p-4 sm:p-6 flex justify-between items-center border-b border-white/5">
           <div className="flex items-center gap-2 sm:gap-3 text-sm sm:text-lg font-black tracking-widest uppercase">
             <i className="fas fa-cloud-sun text-orange-500 animate-pulse" /> RX WEATHER
@@ -389,6 +457,15 @@ const App: React.FC = () => {
                         </span>
                       ) 
                     },
+                    { 
+                      label: "AQI Status", 
+                      val: aqi ? (
+                        <span className={`flex items-center gap-2 ${getAQIStatus(aqi.us_epa_aqi).color}`}>
+                          {aqi.us_epa_aqi} ({getAQIStatus(aqi.us_epa_aqi).label})
+                          <span className="text-[10px] opacity-40">PM2.5: {Math.round(aqi.components.pm2_5)}</span>
+                        </span>
+                      ) : (secondaryLoading ? <i className="fas fa-circle-notch animate-spin opacity-20" /> : '--')
+                    },
                   ].map((d, i) => (
                     <div key={i} className="flex justify-between items-center py-1.5 sm:py-2 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors px-2 -mx-2 rounded-lg">
                       <span className="text-[9px] sm:text-xs opacity-50 font-black uppercase tracking-widest">{d.label}</span>
@@ -423,6 +500,12 @@ const App: React.FC = () => {
                       icon: 'fa-arrow-down', 
                       color: 'text-indigo-400' 
                     },
+                    { 
+                      label: "AQI (PM2.5)", 
+                      val: aqi ? `${aqi.us_epa_aqi} (${Math.round(aqi.components.pm2_5)}µg)` : '--', 
+                      icon: 'fa-mask-face', 
+                      color: aqi ? getAQIStatus(aqi.us_epa_aqi).color : 'text-slate-400' 
+                    },
                 ].map((m, i) => (
                   <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-[24px] flex flex-col gap-2 group hover:bg-white/10 transition-all active:scale-95">
                     <div className="flex items-center justify-between">
@@ -435,7 +518,13 @@ const App: React.FC = () => {
               </div>
 
               {/* Refined Atmospheric Analysis Section */}
-              <div className="mt-2 sm:mt-8 overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-700">
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                className="mt-2 sm:mt-8 overflow-hidden rounded-[28px] border border-white/10 bg-black/20 shadow-2xl"
+              >
                 <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 px-5 py-3.5 flex justify-between items-center border-b border-white/10">
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/20">
@@ -443,9 +532,22 @@ const App: React.FC = () => {
                     </div>
                     <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-white/80">Atmospheric Analysis</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-full border border-white/5">
-                    <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
-                    <span className="text-[7px] font-black text-blue-400 uppercase tracking-widest hidden sm:inline">Grounded Insight</span>
+                  <div className="flex items-center gap-3">
+                    {aqi && (
+                      <div className={`flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 ${getAQIStatus(aqi.us_epa_aqi).bg}`}>
+                        <span className={`text-[8px] font-black uppercase tracking-widest ${getAQIStatus(aqi.us_epa_aqi).color}`}>
+                          AQI {aqi.us_epa_aqi} • {getAQIStatus(aqi.us_epa_aqi).label}
+                        </span>
+                        <div className="w-px h-2 bg-white/10" />
+                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">
+                          PM2.5: {Math.round(aqi.components.pm2_5)}µg
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-full border border-white/5">
+                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="text-[7px] font-black text-blue-400 uppercase tracking-widest hidden sm:inline">Grounded Insight</span>
+                    </div>
                   </div>
                 </div>
 
@@ -472,6 +574,22 @@ const App: React.FC = () => {
                           ))}
                         </div>
                       )}
+                      
+                      {aiInsight.text.includes('temporarily unavailable') && (
+                        <button 
+                          onClick={() => {
+                            if (weather && aqi) {
+                              setAiInsight({ text: '', links: [] });
+                              getWeatherInsight(weather, aqi, uv || 0, weather.coord.lat, weather.coord.lon)
+                                .then(setAiInsight)
+                                .catch(console.error);
+                            }
+                          }}
+                          className="mt-4 text-[8px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 flex items-center gap-2"
+                        >
+                          <i className="fas fa-redo-alt" /> Retry Analysis
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="py-8 flex flex-col items-center gap-4">
@@ -485,21 +603,147 @@ const App: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 sm:mt-8">
-                <button onClick={() => setIsHourlyOpen(true)} className="glass py-3.5 sm:py-3.5 rounded-2xl text-[8px] sm:text-[10px] font-black uppercase hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg tracking-widest disabled:opacity-50" disabled={!forecast}>Hourly</button>
-                <button onClick={() => setIsDailyOpen(true)} className="glass py-3.5 sm:py-3.5 rounded-2xl text-[8px] sm:text-[10px] font-black uppercase hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg tracking-widest disabled:opacity-50" disabled={!forecast}>Daily</button>
-                <button onClick={() => setIsAQIOpen(true)} className="glass py-3.5 sm:py-3.5 rounded-2xl text-[8px] sm:text-[10px] font-black uppercase hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg tracking-widest disabled:opacity-50" disabled={!aqi}>AQI Detail</button>
-              </div>
+              {/* Hourly Forecast Horizontal Scroll */}
+              {forecast && (
+                <motion.div 
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.9 },
+                    visible: { opacity: 1, scale: 1 }
+                  }}
+                  className="mt-8"
+                >
+                  <div className="flex items-center justify-between mb-4 px-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Hourly Forecast</span>
+                    <span className="text-[8px] font-black uppercase text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full">Next 24h</span>
+                  </div>
+                  <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x">
+                    {forecast.list.slice(0, 8).map((item, idx) => (
+                      <motion.div 
+                        key={idx}
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.5 },
+                          visible: { opacity: 1, scale: 1 }
+                        }}
+                        whileHover={{ y: -5, backgroundColor: 'rgba(255, 255, 255, 0.1)', transition: { duration: 0.2 } }}
+                        className="flex-shrink-0 w-28 glass rounded-[24px] p-4 flex flex-col items-center gap-2 snap-center border border-white/5"
+                      >
+                        <span className="text-[9px] font-black opacity-40 uppercase">
+                          {new Date(item.dt * 1000).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}
+                        </span>
+                        <img 
+                          src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`} 
+                          alt="icon" 
+                          className="w-12 h-12 drop-shadow-lg" 
+                        />
+                        <div className="flex flex-col items-center">
+                          <span className="text-lg font-black">{Math.round(item.main.temp)}°</span>
+                          <div className="flex items-center gap-1 text-[8px] font-bold text-cyan-400">
+                            <i className="fas fa-droplet text-[7px]" />
+                            {Math.round(item.pop * 100)}%
+                          </div>
+                        </div>
+                        <div className="flex justify-between w-full mt-1 px-1 border-t border-white/5 pt-2">
+                          <div className="flex flex-col items-center">
+                            <i className="fas fa-wind text-[7px] opacity-40 mb-0.5" />
+                            <span className="text-[7px] font-bold opacity-60">{Math.round(item.wind.speed * 3.6)}</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <i className="fas fa-tint text-[7px] opacity-40 mb-0.5" />
+                            <span className="text-[7px] font-bold opacity-60">{item.main.humidity}%</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Daily Forecast List */}
+              {forecast && (
+                <motion.div 
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.9 },
+                    visible: { opacity: 1, scale: 1 }
+                  }}
+                  className="mt-6"
+                >
+                  <div className="flex items-center justify-between mb-4 px-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">5-Day Outlook</span>
+                    <i className="fas fa-calendar-alt text-[10px] text-white/20" />
+                  </div>
+                  <div className="space-y-3">
+                    {forecast.list.filter((_, i) => i % 8 === 0).map((item, idx) => (
+                      <motion.div 
+                        key={idx}
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.8 },
+                          visible: { opacity: 1, scale: 1 }
+                        }}
+                        whileHover={{ x: 5, backgroundColor: 'rgba(255, 255, 255, 0.1)', transition: { duration: 0.2 } }}
+                        className="glass rounded-[24px] p-4 flex items-center justify-between border border-white/5"
+                      >
+                        <div className="flex items-center gap-3 w-28">
+                          <span className="text-[10px] font-black uppercase opacity-40 w-8">
+                            {new Date(item.dt * 1000).toLocaleDateString('en-US', { weekday: 'short' })}
+                          </span>
+                          <img 
+                            src={`https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`} 
+                            alt="icon" 
+                            className="w-10 h-10" 
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black">{Math.round(item.main.temp)}°</span>
+                            <div className="flex items-center gap-1 text-[8px] font-bold text-cyan-400">
+                              <i className="fas fa-droplet text-[7px]" />
+                              {Math.round(item.pop * 100)}%
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 px-4 flex justify-around items-center">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <i className="fas fa-wind text-[9px] opacity-30" />
+                            <span className="text-[9px] font-bold opacity-60">{Math.round(item.wind.speed * 3.6)}<span className="text-[7px] ml-0.5">km/h</span></span>
+                          </div>
+                          <div className="flex flex-col items-center gap-0.5">
+                            <i className="fas fa-tint text-[9px] opacity-30" />
+                            <span className="text-[9px] font-bold opacity-60">{item.main.humidity}%</span>
+                          </div>
+                          <div className="hidden sm:flex flex-col items-center">
+                            <span className="text-[9px] font-bold capitalize opacity-60 truncate max-w-[80px]">{item.weather[0].description}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 w-24 justify-end">
+                          <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(item.main.temp / 40) * 100}%` }}
+                              transition={{ delay: 0.5 + idx * 0.1, duration: 1, ease: "easeOut" }}
+                              className="h-full bg-gradient-to-r from-orange-600 to-orange-400" 
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Map Display */}
-              <div className="h-60 sm:h-80">
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0, scale: 0.95 },
+                  visible: { opacity: 1, scale: 1 }
+                }}
+                className="h-60 sm:h-80"
+              >
                 <MapDisplay lat={weather.coord.lat} lon={weather.coord.lon} cityName={weather.name} />
-              </div>
+              </motion.div>
             </div>
-          ) : (
+          ) : loading ? (
             <div className="py-16 sm:py-24 flex flex-col items-center gap-4 sm:gap-6">
               <div className="relative">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/10 border-t-orange-500 rounded-full animate-spin" />
@@ -509,15 +753,51 @@ const App: React.FC = () => {
               </div>
               <p className="opacity-50 text-[9px] sm:text-xs font-black uppercase tracking-[0.3em] animate-pulse">Establishing precise sync...</p>
             </div>
+          ) : (
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0, scale: 0.8 },
+                visible: { opacity: 1, scale: 1 }
+              }}
+              className="py-16 sm:py-24 flex flex-col items-center text-center gap-8"
+            >
+               <div className="relative">
+                 <div className="w-24 h-24 sm:w-32 sm:h-32 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20">
+                   <i className="fas fa-compass text-4xl sm:text-5xl text-orange-500 animate-[spin_10s_linear_infinite]" />
+                 </div>
+                 <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                   <i className="fas fa-search text-white text-xs" />
+                 </div>
+               </div>
+               <div className="space-y-3">
+                 <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">Ready for Sync?</h3>
+                 <p className="text-xs sm:text-sm opacity-50 max-w-[280px] mx-auto font-medium leading-relaxed">
+                   Search for any city or use your GPS for a hyper-local atmospheric analysis.
+                 </p>
+               </div>
+               <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+                 <button 
+                  onClick={handleLocationSearch}
+                  className="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3"
+                 >
+                   <i className="fas fa-location-arrow" /> Use GPS
+                 </button>
+                 <button 
+                  onClick={() => document.querySelector('input')?.focus()}
+                  className="flex-1 glass py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-white/10 active:scale-95 transition-all border border-white/10"
+                 >
+                   Manual Search
+                 </button>
+               </div>
+            </motion.div>
           )}
         </div>
 
         <div className="bg-black/30 p-6 sm:p-8 text-center space-y-1 sm:space-y-2 border-t border-white/5">
           <div className="text-[10px] sm:text-sm opacity-80 font-medium">Powered by <span className="font-black text-orange-500 hover:text-orange-400 cursor-help transition-colors">RX ENTERTAINMENT</span></div>
           <div className="text-[8px] sm:text-[10px] opacity-30 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-bold">&copy; 2026 RX Weather. Engineered by Aman.</div>
-          <div className="text-[10px] sm:text-xs font-black text-cyan-400 animate-pulse tracking-[0.3em] sm:tracking-[0.4em] pt-2 sm:pt-4">MADE WITH LOVE BY AMAN</div>
         </div>
-      </div>
+      </motion.div>
 
       <a 
         href="https://www.instagram.com/aman_devv/" 
@@ -534,34 +814,6 @@ const App: React.FC = () => {
         onLogin={handleLogin} 
       />
       
-      {forecast && (
-        <>
-          <ForecastModal 
-            isOpen={isHourlyOpen} 
-            onClose={() => setIsHourlyOpen(false)} 
-            items={forecast.list.slice(0, 8)} 
-            title="Next 24 Hours"
-            type="hourly"
-          />
-          <ForecastModal 
-            isOpen={isDailyOpen} 
-            onClose={() => setIsDailyOpen(false)} 
-            items={forecast.list.filter((_, i) => i % 8 === 0)} 
-            title="5-Day Outlook"
-            type="daily"
-          />
-        </>
-      )}
-
-      {aqi && (
-        <AQIModal 
-          isOpen={isAQIOpen} 
-          onClose={() => setIsAQIOpen(false)} 
-          aqiData={aqi} 
-          hotspot={hotspot}
-        />
-      )}
-
       {isContactOpen && (
         <div className="fixed inset-0 z-[200] flex animate-in slide-in-from-left duration-700">
           <div className="w-64 sm:w-80 h-full bg-gradient-to-br from-indigo-900 to-purple-950 p-8 sm:p-12 flex flex-col justify-center relative shadow-[50px_0_100px_rgba(0,0,0,0.5)] border-r border-white/10">
@@ -587,6 +839,9 @@ const App: React.FC = () => {
           </div>
           <div className="flex-1 bg-black/40 backdrop-blur-md" onClick={() => setIsContactOpen(false)} />
         </div>
+      )}
+
+        </motion.div>
       )}
 
       <style>{`

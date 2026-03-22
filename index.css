@@ -1,0 +1,626 @@
+
+@import "tailwindcss";
+
+@keyframes panda-float {
+  0%, 100% { transform: translateY(0) translateX(-50%); }
+  50% { transform: translateY(-5px) translateX(-50%); }
+}
+
+@keyframes blush-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1) rotate(25deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(25deg); }
+}
+
+@keyframes blush-pulse-r {
+  0%, 100% { opacity: 0.8; transform: scale(1) rotate(-25deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(-25deg); }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #0f172a;
+  color: white;
+}
+
+.panda-login-container {
+  background-color: #e95f30;
+  min-height: 400px;
+  width: 350px;
+  position: relative;
+  border-radius: 40px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 100px;
+}
+
+.panda-login-form {
+  height: 220px;
+  width: 280px;
+  background-color: white;
+  position: relative;
+  z-index: 10;
+  padding: 50px 30px 0 30px;
+  box-sizing: border-box;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.panda-backg {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: panda-float 3s ease-in-out infinite;
+}
+
+.panda-face {
+  height: 120px;
+  width: 135px;
+  background-color: white;
+  border-radius: 120px 120px 90px 90px;
+  position: relative;
+}
+
+.panda-earl, .panda-earr {
+  background-color: #4d4449;
+  height: 40px;
+  width: 45px;
+  border-radius: 43px 43px 0 0;
+  position: absolute;
+}
+
+.panda-earl {
+  transform: rotate(-38deg);
+  top: -10px;
+  left: -5px;
+}
+
+.panda-earr {
+  transform: rotate(38deg);
+  top: -10px;
+  right: -5px;
+}
+
+.panda-eyel, .panda-eyer {
+  background-color: #4d4449;
+  height: 35px;
+  width: 32px;
+  border-radius: 32px;
+  position: absolute;
+  top: 35px;
+}
+
+.panda-eyel {
+  left: 25px;
+  transform: rotate(-20deg);
+}
+
+.panda-eyer {
+  right: 25px;
+  transform: rotate(20deg);
+}
+
+.panda-blshl, .panda-blshr {
+  background-color: #ff9999;
+  height: 16px;
+  width: 22px;
+  border-radius: 50%;
+  position: absolute;
+  opacity: 0.8;
+  top: 70px;
+}
+
+.panda-blshl {
+  left: 15px;
+  animation: blush-pulse 2s ease-in-out infinite;
+}
+
+.panda-blshr {
+  right: 15px;
+  animation: blush-pulse-r 2s ease-in-out infinite;
+}
+
+.panda-eyeball1, .panda-eyeball2 {
+  height: 10px;
+  width: 10px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  transition: 0.3s all ease;
+}
+
+.panda-eyeball1 {
+  left: 10px;
+  top: 10px;
+}
+
+.panda-eyeball2 {
+  left: 10px;
+  top: 10px;
+}
+
+.panda-nose {
+  height: 17px;
+  width: 17px;
+  background-color: #4d4449;
+  border-radius: 20px 0px 4px;
+  transform: rotate(45deg);
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  margin-left: -8.5px;
+}
+
+.panda-line {
+  background-color: #4d4449;
+  height: 10px;
+  width: 2px;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 18.5px;
+  top: 15px;
+}
+
+.panda-m, .panda-mm {
+  background-color: #4d4449;
+  height: 8px;
+  width: 15px;
+  border-radius: 0 0 8px 8px;
+  position: absolute;
+  top: 95px;
+}
+
+.panda-m {
+  left: 52px;
+}
+
+.panda-mm {
+  right: 52px;
+}
+
+.panda-m1 {
+  height: 6px;
+  width: 13px;
+  background-color: white;
+  border-radius: 0 0 10px 10px;
+  position: absolute;
+  left: 1px;
+  top: 0px;
+}
+
+.panda-handl, .panda-handr {
+  background-color: #4d4449;
+  height: 45px;
+  width: 35px;
+  border-radius: 10px 10px 30px 30px;
+  z-index: 20;
+  transition: 0.5s all ease;
+  position: absolute;
+  pointer-events: none;
+}
+
+.panda-handl {
+  top: 150px;
+  left: 40px;
+}
+
+.panda-handr {
+  top: 150px;
+  right: 40px;
+}
+
+.panda-pawl, .panda-pawr {
+  background-color: #4d4449;
+  height: 50px;
+  width: 50px;
+  border-radius: 40px 40px 20px 20px;
+  position: absolute;
+  z-index: 5;
+}
+
+.panda-pawl {
+  top: 320px;
+  left: 60px;
+}
+
+.panda-pawr {
+  top: 320px;
+  right: 60px;
+}
+
+.panda-p1 {
+  background-color: white;
+  height: 25px;
+  width: 30px;
+  position: absolute;
+  top: 21px;
+  left: 10px;
+  border-radius: 25px 25px 10px 10px;
+}
+
+.panda-p2, .panda-p3, .panda-p4 {
+  background-color: white;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.panda-p2 {
+  bottom: 13px;
+  left: 9.5px;
+}
+
+.panda-p3 {
+  bottom: 17.2px;
+  right: 2.5px;
+}
+
+.panda-p4 {
+  bottom: 27.2px;
+  left: 22px;
+}
+
+.panda-login-form input {
+  color: #4d4449;
+  width: 180px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #4d4449;
+  font-family: 'Ubuntu', sans-serif;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.panda-login-form input:focus {
+  border-bottom: 2px solid #e95f30;
+  transform: translateY(-2px);
+}
+
+.panda-login-form i {
+  color: #4d4449;
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.panda-login-form button {
+  background-color: #e95f30;
+  outline: none;
+  border: none;
+  color: white;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 20px;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s all ease;
+  width: 100%;
+}
+
+.panda-login-form button:hover {
+  background-color: #d14d24;
+  transform: scale(1.05);
+}
+
+/* Netflix Intro Animation */
+#intro-container .netflixintro {
+  display: block;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  overflow: hidden;
+  animation-name: zoom-in;
+  animation-delay: 0.5s;
+  animation-duration: 2.5s; /* Faster */
+  animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+  animation-fill-mode: forwards;
+  background-size: 4000px;
+  background-position: -1950px 0;
+}
+
+#intro-container .netflixintro::before {
+  content: "";
+  position: absolute;
+  display: block;
+  background-color: #000000;
+  width: 150%;
+  height: 30%;
+  left: -25%;
+  bottom: -27%;
+  border-radius: 50%;
+  z-index: 5;
+  transform-origin: left center;
+  background-size: 4000px;
+  background-position: -1950px 0;
+}
+
+#intro-container .netflixintro[data-letter=N] {
+  transform-origin: 30% center;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-1 {
+  width: 19.5%;
+  height: 100%;
+  background-color: rgba(228, 9, 19, 0.5);
+  left: 22.4%;
+  top: 0;
+  transform: rotate(180deg);
+  animation-name: fading-lumieres-box;
+  animation-duration: 2s;
+  animation-delay: 0.6s;
+  animation-fill-mode: forwards;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-1 .effect-brush {
+  animation-name: brush-moving;
+  animation-duration: 2.5s;
+  animation-fill-mode: forwards;
+  animation-delay: 1.2s;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-1 .effect-brush [class*=fur-] {
+  bottom: 0;
+  height: 40%;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-3 {
+  width: 19%;
+  height: 150%;
+  left: 40.5%;
+  top: -25%;
+  transform: rotate(-19.5deg);
+  box-shadow: 0px 0px 35px -12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-3 .effect-brush {
+  animation-name: brush-moving;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  animation-delay: 0.8s;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-2 {
+  width: 19.5%;
+  height: 100%;
+  left: 57.8%;
+  top: 0;
+  transform: rotate(180deg);
+  overflow: hidden;
+}
+
+#intro-container .netflixintro[data-letter=N] .helper-2 .effect-brush {
+  animation-name: brush-moving;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  animation-delay: 0.5s;
+}
+
+#intro-container .netflixintro [class*=helper-] {
+  position: absolute;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-brush {
+  position: absolute;
+  width: 100%;
+  height: 300%;
+  top: 0;
+  overflow: hidden;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-brush::before {
+  display: block;
+  content: "";
+  position: absolute;
+  background-color: #e40913;
+  width: 100%;
+  height: 70%;
+  box-shadow: 0px 0px 29px 24px #e40913;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-brush [class*=fur-] {
+  display: block;
+  position: absolute;
+  bottom: 10%;
+  height: 30%;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-1 { left: 0%; width: 3.8%; background: linear-gradient(to bottom, #e40913 0%, #e40913 15%, rgba(0, 0, 0, 0) 81%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-2 { left: 3.8%; width: 2.8%; background: linear-gradient(to bottom, #e40913 0%, #e40913 10%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-3 { left: 6.6%; width: 4.8%; background: linear-gradient(to bottom, #e40913 0%, #e40913 37%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-4 { left: 11.4%; width: 4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 23%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-5 { left: 15.4%; width: 4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 15%, rgba(0, 0, 0, 0) 86%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-6 { left: 19.4%; width: 2.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 27%, rgba(0, 0, 0, 0) 89%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-7 { left: 21.9%; width: 4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 20%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-8 { left: 25.9%; width: 2%; background: linear-gradient(to bottom, #e40913 0%, #e40913 30%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-9 { left: 27.9%; width: 4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 35%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-10 { left: 31.9%; width: 3.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 39%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-11 { left: 35.4%; width: 2%; background: linear-gradient(to bottom, #e40913 0%, #e40913 34%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-12 { left: 37.4%; width: 2.6%; background: linear-gradient(to bottom, #e40913 0%, #e40913 22%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-13 { left: 40%; width: 6%; background: linear-gradient(to bottom, #e40913 0%, #e40913 47%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-14 { left: 46%; width: 2%; background: linear-gradient(to bottom, #e40913 0%, #e40913 36%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-15 { left: 48%; width: 5.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 29%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-16 { left: 53.5%; width: 3%; background: linear-gradient(to bottom, #e40913 0%, #e40913 39%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-17 { left: 56.5%; width: 4.1%; background: linear-gradient(to bottom, #e40913 0%, #e40913 45%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-18 { left: 60.6%; width: 2.4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 34%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-19 { left: 63%; width: 4%; background: linear-gradient(to bottom, #e40913 0%, #e40913 47%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-20 { left: 67%; width: 1.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 27%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-21 { left: 68.5%; width: 2.8%; background: linear-gradient(to bottom, #e40913 0%, #e40913 37%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-22 { left: 71.3%; width: 2.3%; background: linear-gradient(to bottom, #e40913 0%, #e40913 9%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-23 { left: 73.6%; width: 2.2%; background: linear-gradient(to bottom, #e40913 0%, #e40913 28%, rgba(0, 0, 0, 0) 92%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-24 { left: 75.8%; width: 1%; background: linear-gradient(to bottom, #e40913 0%, #e40913 37%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-25 { left: 76.8%; width: 2.1%; background: linear-gradient(to bottom, #e40913 0%, #e40913 28%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-26 { left: 78.9%; width: 4.1%; background: linear-gradient(to bottom, #e40913 0%, #e40913 34%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-27 { left: 83%; width: 2.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 21%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-28 { left: 85.5%; width: 4.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 39%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-29 { left: 90%; width: 2.8%; background: linear-gradient(to bottom, #e40913 0%, #e40913 30%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-30 { left: 92.8%; width: 3.5%; background: linear-gradient(to bottom, #e40913 0%, #e40913 19%, rgba(0, 0, 0, 0) 100%); }
+#intro-container .netflixintro [class*=helper-] .effect-brush .fur-31 { left: 96.3%; width: 3.7%; background: linear-gradient(to bottom, #e40913 0%, #e40913 37%, rgba(0, 0, 0, 0) 100%); }
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation-name: showing-lumieres;
+  animation-duration: 2s;
+  animation-delay: 1.6s;
+  animation-fill-mode: forwards;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres [class*=lamp-] {
+  position: absolute;
+  display: block;
+  height: 100%;
+  box-shadow: 0px 0px 10px 0px rgba(228, 9, 19, 0.75);
+  background: var(--color);
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres [class*=lamp-]::before {
+  position: absolute;
+  content: " ";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color);
+  box-shadow: 0px 0px 10px 0px rgba(228, 9, 19, 0.75);
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-1 { --color: #ff0100; left: 0.7%; width: 1%; animation-delay: 1.43s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-1::before { left: 41%; animation-delay: 1.61s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-2 { --color: #ffde01; left: 2.2%; width: 1.4%; animation-delay: 1.72s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-2::before { left: 153%; animation-delay: 0.05s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-3 { --color: #ff00cc; left: 5.8%; width: 2.1%; animation-delay: 0.45s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-3::before { left: 140%; animation-delay: 0.16s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-4 { --color: #04fd8f; left: 10.1%; width: 2%; animation-delay: 0.21s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-4::before { left: 158%; animation-delay: 0.5s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-5 { --color: #ff0100; left: 12.9%; width: 1.4%; animation-delay: 1.05s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-5::before { left: 114%; animation-delay: 1.28s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-6 { --color: #ff9600; left: 15.3%; width: 2.8%; animation-delay: 0.94s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-6::before { left: 104%; animation-delay: 0.47s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-7 { --color: #0084ff; left: 21.2%; width: 2.5%; animation-delay: 0.96s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-7::before { left: 113%; animation-delay: 1.28s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-8 { --color: #f84006; left: 25%; width: 2.5%; animation-delay: 0.15s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-8::before { left: 110%; animation-delay: 0.46s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-9 { --color: #ffc601; left: 30.5%; width: 3%; animation-delay: 0.54s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-9::before { left: 92%; animation-delay: 0.39s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-10 { --color: #ff4800; left: 36.3%; width: 3%; animation-delay: 0.21s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-10::before { left: 173%; animation-delay: 1.59s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-11 { --color: #fd0100; left: 41%; width: 2.2%; animation-delay: 1.18s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-11::before { left: 29%; animation-delay: 0.65s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-12 { --color: #01ffff; left: 44.2%; width: 2.6%; animation-delay: 1.87s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-12::before { left: 80%; animation-delay: 1.96s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-13 { --color: #ffc601; left: 51.7%; width: 0.5%; animation-delay: 1.27s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-13::before { left: 55%; animation-delay: 1.66s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-14 { --color: #ffc601; left: 52.1%; width: 1.8%; animation-delay: 0.89s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-14::before { left: 141%; animation-delay: 1.21s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-15 { --color: #0078fe; left: 53.8%; width: 2.3%; animation-delay: 1.11s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-15::before { left: 15%; animation-delay: 1.38s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-16 { --color: #0080ff; left: 57.2%; width: 2%; animation-delay: 0.15s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-16::before { left: 62%; animation-delay: 0.6s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-17 { --color: #ffae01; left: 62.3%; width: 2.9%; animation-delay: 1.83s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-17::before { left: 10%; animation-delay: 0.05s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-18 { --color: #ff00bf; left: 65.8%; width: 1.7%; animation-delay: 1.78s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-18::before { left: 178%; animation-delay: 0.93s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-19 { --color: #a601f4; left: 72.8%; width: 0.8%; animation-delay: 0.11s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-19::before { left: 36%; animation-delay: 0.76s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-20 { --color: #f30b34; left: 74.3%; width: 2%; animation-delay: 0.35s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-20::before { left: 129%; animation-delay: 1.15s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-21 { --color: #ff00bf; left: 79.8%; width: 2%; animation-delay: 0.28s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-21::before { left: 42%; animation-delay: 1.13s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-22 { --color: #04fd8f; left: 78.2%; width: 2%; animation-delay: 1.1s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-22::before { left: 23%; animation-delay: 1.89s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-23 { --color: #01ffff; left: 78.5%; width: 2%; animation-delay: 1.21s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-23::before { left: 34%; animation-delay: 0.15s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-24 { --color: #a201ff; left: 85.3%; width: 1.1%; animation-delay: 1.44s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-24::before { left: 158%; animation-delay: 0.42s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-25 { --color: #ec0014; left: 86.9%; width: 1.1%; animation-delay: 1.23s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-25::before { left: 153%; animation-delay: 1.84s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-26 { --color: #0078fe; left: 88.8%; width: 2%; animation-delay: 0.08s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-26::before { left: 26%; animation-delay: 0.63s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-27 { --color: #ff0036; left: 92.4%; width: 2.4%; animation-delay: 1.89s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-27::before { left: 80%; animation-delay: 1.68s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-28 { --color: #06f98c; left: 96.2%; width: 2.1%; animation-delay: 1.23s; }
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-28::before { left: 197%; animation-delay: 0.46s; }
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres [class*=lamp-] {
+  animation-duration: 5s;
+  animation-fill-mode: forwards;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-1,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-3,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-5,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-7,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-9,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-11,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-13,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-15,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-17,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-19,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-21,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-23,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-25,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-27 {
+  animation-name: lumieres-moving-left;
+}
+
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-2,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-4,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-6,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-8,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-10,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-12,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-14,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-16,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-18,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-20,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-22,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-24,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-26,
+#intro-container .netflixintro [class*=helper-] .effect-lumieres .lamp-28 {
+  animation-name: lumieres-moving-right;
+}
+
+@keyframes brush-moving {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes fading-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes lumieres-moving-right {
+  0% { transform: translate(0); }
+  40% { transform: translate(-10px) scaleX(1); }
+  50% { transform: translate(-60px); }
+  100% { transform: translate(-120px) scaleX(3); }
+}
+
+@keyframes lumieres-moving-left {
+  0% { transform: translate(0); }
+  40% { transform: translate(10px) scaleX(1); }
+  50% { transform: translate(60px); }
+  100% { transform: translate(120px) scaleX(3); }
+}
+
+@keyframes zoom-in {
+  0% { transform: scale(1); }
+  100% { transform: scale(20); }
+}
+
+@keyframes showing-lumieres {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fading-lumieres-box {
+  0% { background-color: rgba(228, 9, 19, 0.5); }
+  100% { background-color: rgba(228, 9, 19, 0); }
+}

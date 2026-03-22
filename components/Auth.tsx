@@ -11,97 +11,179 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin }) => {
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
+  const [focusType, setFocusType] = useState<'text' | 'password' | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname || !email) return alert("Please fill all fields");
-    if (!email.includes("@")) return alert("Please enter a valid email");
+    setError(null);
+    
+    if (!nickname || !email) {
+      setError("Please fill all fields");
+      return;
+    }
+    if (!email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
 
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setSuccess(true);
-      setTimeout(() => {
-        onLogin({ nickname, email });
-        onClose();
-      }, 1500);
-    }, 2000);
+      onLogin({ nickname, email });
+      onClose();
+    }, 1500);
+  };
+
+  // Panda dynamic styles
+  const handlStyle: React.CSSProperties = focusType === 'password' ? {
+    transform: 'rotate(-150deg)',
+    top: '70px',
+    left: '105px',
+    height: '90px',
+    width: '40px'
+  } : {
+    transform: 'rotate(0deg)',
+    top: '150px',
+    left: '40px',
+    height: '45px',
+    width: '35px'
+  };
+
+  const handrStyle: React.CSSProperties = focusType === 'password' ? {
+    transform: 'rotate(150deg)',
+    top: '70px',
+    right: '105px',
+    height: '90px',
+    width: '40px'
+  } : {
+    transform: 'rotate(0deg)',
+    top: '150px',
+    right: '40px',
+    height: '45px',
+    width: '35px'
+  };
+
+  const eyeball1Style: React.CSSProperties = focusType === 'text' ? {
+    top: '20px',
+    left: '13px'
+  } : {
+    top: '10px',
+    left: '10px'
+  };
+
+  const eyeball2Style: React.CSSProperties = focusType === 'text' ? {
+    top: '20px',
+    left: '8px'
+  } : {
+    top: '10px',
+    left: '10px'
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-500">
-      <div className="bg-slate-900 border border-white/10 w-full max-w-sm rounded-[40px] p-10 text-center relative animate-in zoom-in-95 duration-500 shadow-2xl overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/10 blur-[100px] pointer-events-none" />
-        
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-500">
+      <div className="panda-login-container relative shadow-2xl animate-in zoom-in-95 duration-500">
         <button 
           onClick={onClose} 
-          className="absolute top-8 right-8 text-2xl opacity-40 hover:opacity-100 hover:rotate-90 hover:scale-125 transition-all duration-300 active:scale-90"
+          className="absolute top-6 right-6 text-white/60 hover:text-white text-2xl z-50 transition-colors"
         >
-          &times;
+          <i className="fas fa-times" />
         </button>
-        
-        {!loading && !success && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="w-16 h-16 bg-blue-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <i className="fas fa-fingerprint text-blue-500 text-3xl" />
-            </div>
-            <h2 className="text-3xl font-black mb-2 tracking-tighter">Welcome</h2>
-            <p className="text-xs font-medium opacity-40 mb-10 uppercase tracking-widest">Identify Yourself</p>
-            
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="relative group">
-                <i className="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-xs opacity-30 group-focus-within:text-blue-500 transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Nickname" 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 outline-none focus:border-blue-500/50 focus:bg-blue-500/5 transition-all duration-300"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                />
-              </div>
-              <div className="relative group">
-                <i className="fas fa-at absolute left-5 top-1/2 -translate-y-1/2 text-xs opacity-30 group-focus-within:text-blue-500 transition-colors" />
-                <input 
-                  type="email" 
-                  placeholder="Google Email" 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 outline-none focus:border-blue-500/50 focus:bg-blue-500/5 transition-all duration-300"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <button className="w-full bg-blue-600 hover:bg-blue-500 py-4.5 rounded-2xl font-black uppercase text-xs tracking-widest transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-blue-600/20 mt-4 group">
-                Continue <i className="fas fa-arrow-right ml-2 opacity-50 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </form>
-          </div>
-        )}
 
-        {loading && (
-          <div className="py-12 flex flex-col items-center">
-            <div className="relative mb-6">
-              <div className="w-16 h-16 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <i className="fas fa-shield-halved text-blue-500 animate-pulse" />
-              </div>
+        <div className="panda-backg">
+          <div className="panda-face">
+            <div className="panda-earl"></div>
+            <div className="panda-earr"></div>
+            <div className="panda-blshl"></div>
+            <div className="panda-blshr"></div>
+            <div className="panda-eyel">
+              <div className="panda-eyeball1" style={eyeball1Style}></div>
             </div>
-            <p className="text-blue-400 font-black uppercase text-[10px] tracking-[0.3em]">Validating Access...</p>
+            <div className="panda-eyer">
+              <div className="panda-eyeball2" style={eyeball2Style}></div>
+            </div>
+            <div className="panda-nose">
+              <div className="panda-line"></div>
+            </div>
+            <div className="panda-m">
+              <div className="panda-m1"></div>
+            </div>
+            <div className="panda-mm">
+              <div className="panda-m1"></div>
+            </div>
           </div>
-        )}
+        </div>
 
-        {success && (
-          <div className="py-12 flex flex-col items-center animate-in zoom-in duration-700">
-            <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-2xl shadow-green-500/10">
-              <i className="fas fa-check-circle animate-[bounce_0.5s_ease-in-out_infinite]" />
-            </div>
-            <p className="text-2xl font-black tracking-tighter mb-2">Access Granted</p>
-            <p className="text-xs opacity-40 font-bold uppercase tracking-widest">Preparing your board...</p>
+        <div className="panda-handl" style={handlStyle}></div>
+        <div className="panda-handr" style={handrStyle}></div>
+
+        <div className="panda-pawl">
+          <div className="panda-p1">
+            <div className="panda-p2"></div>
+            <div className="panda-p3"></div>
+            <div className="panda-p4"></div>
           </div>
-        )}
+        </div>
+        <div className="panda-pawr">
+          <div className="panda-p1">
+            <div className="panda-p2"></div>
+            <div className="panda-p3"></div>
+            <div className="panda-p4"></div>
+          </div>
+        </div>
+
+        <div className="panda-login-form">
+          <form onSubmit={handleLogin}>
+            {error && (
+              <div className="absolute top-2 left-0 right-0 text-center animate-in shake-in duration-300">
+                <p className="text-[10px] text-red-500 font-black uppercase tracking-widest">{error}</p>
+              </div>
+            )}
+            <div className="flex items-center mb-4 group">
+              <i className="fa fa-user transition-transform group-focus-within:scale-125 group-focus-within:text-orange-500" aria-hidden="true"></i>
+              <input 
+                type="text" 
+                placeholder="Nickname"
+                className="transition-all duration-300"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                onFocus={() => setFocusType('text')}
+                onBlur={() => setFocusType(null)}
+                required
+              />
+            </div>
+            <div className="flex items-center mb-6 group">
+              <i className="fa fa-unlock-alt transition-transform group-focus-within:scale-125 group-focus-within:text-orange-500" aria-hidden="true"></i>
+              <input 
+                type="password" 
+                placeholder="Password (Email)"
+                className="transition-all duration-300"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setFocusType('password')}
+                onBlur={() => setFocusType(null)}
+                required
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className={`relative overflow-hidden group ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-orange-500/30'}`}
+            >
+              <span className={`flex items-center justify-center gap-2 transition-all duration-300 ${loading ? 'translate-y-10' : ''}`}>
+                Login <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform" />
+              </span>
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center animate-in slide-in-from-bottom-10">
+                  <i className="fas fa-circle-notch animate-spin mr-2" /> Logging in...
+                </div>
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

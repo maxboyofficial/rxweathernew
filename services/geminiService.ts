@@ -7,6 +7,36 @@ export interface WeatherInsightResult {
   links: GroundingLink[];
 }
 
+// Persistent cache to reduce API calls and stay within quota across refreshes
+const CACHE_KEY_PREFIX = 'gemini_insight_cache_';
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+
+const getCachedInsight = (key: string): WeatherInsightResult | null => {
+  try {
+    const saved = localStorage.getItem(CACHE_KEY_PREFIX + key);
+    if (!saved) return null;
+    const { result, timestamp } = JSON.parse(saved);
+    if (Date.now() - timestamp < CACHE_DURATION) {
+      return result;
+    }
+    localStorage.removeItem(CACHE_KEY_PREFIX + key);
+  } catch (e) {
+    console.error("Cache read error:", e);
+  }
+  return null;
+};
+
+const setCachedInsight = (key: string, result: WeatherInsightResult) => {
+  try {
+    localStorage.setItem(CACHE_KEY_PREFIX + key, JSON.stringify({
+      result,
+      timestamp: Date.now()
+    }));
+  } catch (e) {
+    console.error("Cache write error:", e);
+  }
+};
+
 export const getWeatherInsight = async (
   weather: WeatherData, 
   aqi: AQIData, 
@@ -14,6 +44,13 @@ export const getWeatherInsight = async (
   lat: number,
   lon: number
 ): Promise<WeatherInsightResult> => {
+  const cacheKey = `${lat.toFixed(2)}_${lon.toFixed(2)}`;
+  const cached = getCachedInsight(cacheKey);
+  
+  if (cached) {
+    return cached;
+  }
+
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `
@@ -66,9 +103,46 @@ export const getWeatherInsight = async (
       });
     }
 
-    return { text, links };
-  } catch (error) {
-    console.error("Gemini Error:", error);
+    const result = { text, links };
+    setCachedInsight(cacheKey, result);
+    return result;
+  } catch (error: any) {
+    console.error("Gemini Error (2.5-flash):", error);
+    
+    // Extract error details more robustly
+    const errorStr = typeof error === 'string' ? error : (error.message || JSON.stringify(error));
+    const isQuotaError = 
+      errorStr.includes('429') || 
+      errorStr.includes('RESOURCE_EXHAUSTED') || 
+      error?.status === 'RESOURCE_EXHAUSTED' || 
+      error?.code === 429 ||
+      (error?.error?.code === 429) ||
+      (error?.error?.status === 'RESOURCE_EXHAUSTED');
+
+    if (isQuotaError) {
+      try {
+        // Wait a small amount of time before fallback to let the rate limit breathe
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const aiFallback = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const fallbackResponse = await aiFallback.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: prompt + "\n\n(Note: Provide a general analysis as local map data is currently unavailable.)",
+        });
+        
+        const fallbackText = fallbackResponse.text || "Atmospheric conditions are stable.";
+        const fallbackResult = { text: fallbackText, links: [] };
+        setCachedInsight(cacheKey, fallbackResult);
+        return fallbackResult;
+      } catch (fallbackError: any) {
+        console.error("Gemini Fallback Error (3-flash):", fallbackError);
+        return { 
+          text: "**AI insights are temporarily unavailable** due to high demand. Atmospheric conditions appear stable. Please try again in a few minutes.",
+          links: []
+        };
+      }
+    }
+
     return { 
       text: "Conditions are favorable for outdoor activity. Stay hydrated.",
       links: []

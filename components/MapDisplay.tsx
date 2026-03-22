@@ -25,7 +25,10 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
   const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
   const [activeFrameIndex, setActiveFrameIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [radarError, setRadarError] = useState<string | null>(null);
+  const [isStaticRadar, setIsStaticRadar] = useState(false);
   const radarLayersRef = useRef<any[]>([]);
+  const staticRadarLayerRef = useRef<any>(null);
   const animationIntervalRef = useRef<number | null>(null);
 
   const layerConfigs = {
@@ -66,18 +69,52 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
   }, [lat, lon]);
 
   // 2. Fetch Radar Timestamps from RainViewer (Standard for Animation)
-  const fetchRadarFrames = async () => {
+  const fetchRadarFrames = async (retries = 3) => {
+    const urls = [
+      'https://api.rainviewer.com/public/weather-maps.json',
+      'https://api.rainviewer.com/public/maps.json',
+      'https://www.rainviewer.com/api/weather-maps.json'
+    ];
+    
+    const url = urls[retries % urls.length];
+    
     try {
-      const response = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+      setRadarError(null);
+      setIsStaticRadar(false);
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      const frames: RadarFrame[] = data.radar.past.map((f: any) => ({
+      
+      // Handle both formats (radar.past or just an array)
+      const pastFrames = data.radar?.past || (Array.isArray(data) ? data : null);
+      
+      if (!pastFrames) {
+        throw new Error("Invalid radar data format");
+      }
+
+      const frames: RadarFrame[] = pastFrames.map((f: any) => ({
         time: f.time,
         path: f.path
       }));
       setRadarFrames(frames);
       setActiveFrameIndex(frames.length - 1); // Start with most recent
-    } catch (error) {
-      console.error("Failed to fetch radar frames:", error);
+    } catch (error: any) {
+      // Only log as error on final failure to reduce console noise
+      if (retries === 0) {
+        console.error(`Final radar fetch failure from ${url}:`, error);
+        console.log("Falling back to static radar layer...");
+        setIsStaticRadar(true);
+        setRadarError("Animation data unavailable. Using static radar.");
+      } else {
+        console.warn(`Radar fetch attempt failed (${url}). Retrying...`);
+        setTimeout(() => fetchRadarFrames(retries - 1), 2000);
+      }
     }
   };
 
@@ -105,6 +142,11 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
       labels.addTo(mapRef.current);
       layersRef.current['labels'] = labels;
     }
+
+    // Re-bring radar to front if static
+    if (isStaticRadar && staticRadarLayerRef.current) {
+      staticRadarLayerRef.current.bringToFront();
+    }
   };
 
   useEffect(() => {
@@ -113,11 +155,27 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
 
   // 4. Manage Radar Layers Animation
   useEffect(() => {
-    if (!mapRef.current || radarFrames.length === 0) return;
+    if (!mapRef.current) return;
 
     // Clear existing radar layers
     radarLayersRef.current.forEach(layer => mapRef.current.removeLayer(layer));
     radarLayersRef.current = [];
+    if (staticRadarLayerRef.current) {
+      mapRef.current.removeLayer(staticRadarLayerRef.current);
+      staticRadarLayerRef.current = null;
+    }
+
+    if (isStaticRadar) {
+      // Fallback: Static OWM Radar Layer
+      // @ts-ignore
+      staticRadarLayerRef.current = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OPENWEATHER_API_KEY}`, {
+        opacity: 0.6,
+        zIndex: 100
+      }).addTo(mapRef.current);
+      return;
+    }
+
+    if (radarFrames.length === 0) return;
 
     // Pre-load all frames but keep them hidden (opacity 0)
     radarFrames.forEach((frame, idx) => {
@@ -133,7 +191,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
     if (activeFrameIndex !== -1 && radarLayersRef.current[activeFrameIndex]) {
       radarLayersRef.current[activeFrameIndex].setOpacity(0.6);
     }
-  }, [radarFrames]);
+  }, [radarFrames, isStaticRadar]);
 
   // 5. Handle Animation Interval
   useEffect(() => {
@@ -192,7 +250,20 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ lat, lon, cityName }) => {
       </div>
 
       {/* Radar Animation Player Bar */}
-      {radarFrames.length > 0 && (
+      {radarError && (
+        <div className={`absolute bottom-4 left-4 right-4 z-[400] ${isStaticRadar ? 'bg-orange-500/20 border-orange-500/30' : 'bg-red-500/20 border-red-500/30'} backdrop-blur-md border rounded-xl p-3 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 shadow-2xl`}>
+          <i className={`fas ${isStaticRadar ? 'fa-info-circle text-orange-400' : 'fa-exclamation-triangle text-red-400'} text-xs`} />
+          <span className={`text-[9px] font-black uppercase tracking-widest ${isStaticRadar ? 'text-orange-200' : 'text-red-200'}`}>{radarError}</span>
+          <button 
+            onClick={() => fetchRadarFrames()}
+            className={`ml-auto ${isStaticRadar ? 'bg-orange-500/20 hover:bg-orange-500/40' : 'bg-red-500/20 hover:bg-red-500/40'} px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all`}
+          >
+            {isStaticRadar ? 'Try Animation' : 'Retry'}
+          </button>
+        </div>
+      )}
+
+      {radarFrames.length > 0 && !isStaticRadar && (
         <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 left-4 right-4 z-[400] glass border-white/10 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex items-center gap-3 sm:gap-5 animate-in slide-in-from-bottom-6 duration-700 shadow-2xl">
           <button 
             onClick={() => setIsPlaying(!isPlaying)}
